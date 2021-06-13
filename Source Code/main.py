@@ -65,3 +65,9 @@ axes[2].set_ylabel('Height')
 axes[2].set_title('Noisy Image')
 axes[2].imshow(add_noise_to_image(img))
 plt.show()
+
+################################################### Part 2 ###################################################
+''' A bilateral filter is a non-linear, edge-preserving, noise-reducing image smoothing filter. It replaces 
+each pixel's intensity with a weighted average of intensity values from surrounding pixels. A Gaussian 
+distribution can be used to calculate this weight. '''
+################################################### ###### ###################################################
