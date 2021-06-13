@@ -1,6 +1,6 @@
 # Importing the packages
 from math import log10, sqrt
-import numpy as np
+import numpy as np,cv2
 from skimage import io
 from matplotlib import pyplot as plt
 from skimage.util import random_noise
@@ -70,3 +70,19 @@ plt.show()
 each pixel's intensity with a weighted average of intensity values from surrounding pixels. A Gaussian 
 distribution can be used to calculate this weight. '''
 ################################################### ###### ###################################################
+
+# To perform bilateral filtering at first we need to create a spacial gaussian kernel 
+# Funtion to perform/calculate gaussian kernel
+def gaussKernel(img,windowSize,sigmaValue):
+  ''' Uses the open CV package to calculate the gaussian Blur which 
+  takes in the image, window size and sigma Value.'''
+  kernel = cv2.GaussianBlur(img,windowSize,sigmaValue)
+  return kernel
+
+spacialKernel = gaussKernel(img,(5,5),1)
+
+height,width,channels = img.shape
+
+# Initialising the pixel value
+pixVal = height*width
+
