@@ -23,9 +23,8 @@ def add_noise_to_image(image):
 # A function to check the Peak Signal Ratio
 def psnr(orgImg, nosiyImage): 
 	mse = np.mean((orgImg - nosiyImage) ** 2) 
-	if(mse == 0):
-		return 100
-	maximum_pixel_can_be_used = 255.0
+	if(mse == 0):return 100
+	maximum_pixel_can_be_used = 255.0 # This number can be cahnged according to our wish
 	ratio = 20 * log10(maximum_pixel_can_be_used / sqrt(mse)) 
 	return ratio
 
