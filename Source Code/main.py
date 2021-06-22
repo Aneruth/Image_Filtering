@@ -29,12 +29,7 @@ def psnr(orgImg, nosiyImage):
 	return ratio
 
 def rgbToBlack(image):
-  image_copy = image
-  height, width, channels = image.shape
-  for i in range(height):
-    for j in range(width):
-        image_copy[i,j] = 0.3 * img[i,j][0] + 0.59 * img[i,j][1] +  0.11 * img[i,j][2]
-  return image_copy
+  return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 # To perform image analysis
 print(f'Type of the given image is {type(img)}'+ '\n')
@@ -44,13 +39,16 @@ print(f'Width of given image is {img.shape[1]}'+ '\n')
 print(f'Diemension of the given image is {img.ndim}' + '\n')
 print(f'PSNR value is: {psnr(img, add_noise_to_image(img))} dB')
 
-fig,axes = plt.subplots(nrows=1,ncols=3,figsize=(15,8))
+grayImg = rgbToBlack(img)
+noisy_img = add_noise_to_image(grayImg)
+
+fig,axes = plt.subplots(nrows=1,ncols=4,figsize=(15,8))
 
 # to plot the image
 axes[0].set_xlabel('Width')
 axes[0].set_ylabel('Height')
 axes[0].set_title('Orginal Image')
-axes[0].imshow(img)
+axes[0].imshow(grayImg,cmap='gray')
 
 # hist function is used to plot the histogram of an image.
 axes[1].set_xlabel("Value")
@@ -62,7 +60,14 @@ axes[1].hist(img[:,:,0]) # Using the image slicing to convert the 3D image to 2D
 axes[2].set_xlabel('Width')
 axes[2].set_ylabel('Height')
 axes[2].set_title('Noisy Image')
-axes[2].imshow(add_noise_to_image(img))
+axes[2].imshow(add_noise_to_image(grayImg),cmap='gray')
+
+# Intensity of an image
+axes[3].set_xlabel('Intensity Value')
+axes[3].set_ylabel('Count')
+axes[3].set_title('Intensity histogram')
+axes[3].hist(grayImg.ravel(), bins = 250, cumulative = True)
+
 plt.show()
 
 ################################################### Part 2 ###################################################
@@ -73,16 +78,34 @@ distribution can be used to calculate this weight. '''
 
 # To perform bilateral filtering at first we need to create a spacial gaussian kernel 
 # Funtion to perform/calculate gaussian kernel
-def gaussKernel(img,windowSize,sigmaValue):
-  ''' Uses the open CV package to calculate the gaussian Blur which 
-  takes in the image, window size and sigma Value.'''
-  kernel = cv2.GaussianBlur(img,windowSize,sigmaValue)
-  return kernel
+# def gaussKernel(img,windowSize,sigmaValue):
+#   ''' Uses the open CV package to calculate the gaussian Blur which 
+#   takes in the image, window size and sigma Value.'''
+#   kernel = cv2.GaussianBlur(img,windowSize,sigmaValue)
+#   return kernel
 
-spacialKernel = gaussKernel(img,(5,5),1)
+# spacialKernel = gaussKernel(img,(5,5),1)
 
-height,width,channels = img.shape
+# height,width,channels = img.shape
 
-# Initialising the pixel value
-pixVal = height*width
+# # A function to create bilateral filter
+# def bilateralFilter(image,sigma):
+#   output_image = np.zeros([height,width,channels]) # an empty numpy array to store the image
+#   # Iterating over each pixel
+#   for i in range(height):
+#     for j in range(width):
+#       ip,w = 0,0
+#       # Sliding thorough the window size
+#       for x in range(-5,5):
+#         for y in range(-5,5):
+#           q_y = np.max([0, np.min([height - 1, i + x])])
+#           q_x = np.max([0, np.min([width - 1, j + y])])
+#           # Computer Gaussian filter weight at this filter pixel
+#           g = np.exp( -((q_x - j)**2 + (q_y - i)**2) / (2 * sigma**2) )
+#           # Accumulate filtered output
+#           ip += g * image[i, j, :]
+#           # Accumulate filter weight for later normalization, to maintain image brightness
+#           w += g
+#     output_image[i, j, :] = ip / (w + np.finfo(np.float32).eps)
+#   return output_image
 
