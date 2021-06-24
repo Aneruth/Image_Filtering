@@ -96,6 +96,12 @@ def bilateral_filter(i,j,d,I,sigma_d,sigma_r):
             sum_den += w      
     return sum_num/sum_den
 
+''' Iterates for every pixel and performs the bilalteral filtering '''
+for i in range(1,noisy_img.shape[0]):
+    for j in range(1,noisy_img.shape[1]):
+        # Considering the sigma_d,sigma_r as same value and radius as default value 10.
+        bilateral_iamge[i-1,j-1]=bilateral_filter(i-1,j-1,10,I,7,6.5)
+
 plt.imsave('/Users/aneruthmohanasundaram/Documents/GitHub/Project_Alina/Data/alina_output.png',bilateral_iamge,cmap='gray')
 
 print(f'Type of the given bilateral image is {type(bilateral_iamge)}')
