@@ -12,7 +12,7 @@ from imageio import imread
 ################################################### ###### ###################################################
 
 # Loading the image
-img = imread('image path')
+img = imread('/Users/aneruthmohanasundaram/Documents/GitHub/Project_Alina/Data/Test1.PNG')
 
 # A function to add random noise to our image
 def add_noise_to_image(image):
@@ -42,7 +42,7 @@ print(f'PSNR value is: {psnr(img, add_noise_to_image(img))} dB')
 grayImg = rgbToBlack(img)
 noisy_img = add_noise_to_image(grayImg)
 
-fig,axes = plt.subplots(nrows=1,ncols=4,figsize=(15,8))
+fig,axes = plt.subplots(nrows=1,ncols=3,figsize=(15,8))
 
 # to plot the image
 axes[0].set_xlabel('Width')
@@ -61,13 +61,13 @@ axes[2].set_xlabel('Width')
 axes[2].set_ylabel('Height')
 axes[2].set_title('Noisy Image')
 axes[2].imshow(add_noise_to_image(grayImg),cmap='gray')
+plt.show()
 
 # Intensity of an image
-axes[3].set_xlabel('Intensity Value')
-axes[3].set_ylabel('Count')
-axes[3].set_title('Intensity histogram')
-axes[3].hist(grayImg.ravel(), bins = 250, cumulative = True)
-
+plt.xlabel('Intensity Value')
+plt.ylabel('Count')
+plt.title('Intensity histogram')
+plt.hist(grayImg.ravel(), bins = 250, cumulative = True)
 plt.show()
 
 ################################################### Part 2 ###################################################
@@ -76,46 +76,34 @@ each pixel's intensity with a weighted average of intensity values from surround
 distribution can be used to calculate this weight. '''
 ################################################### ###### ###################################################
 
-I = noisy_img
-data = I
-I = np.lib.pad(I, 1, 'mean')
-I_new = np.copy(data)
+I = np.lib.pad(noisy_img, 1, 'mean') # Calculating the mean value of each pixel
+bilateral_iamge = np.copy(noisy_img) # Making a copy data of image
 
-def bilateral_filter(height,width,d,I,sigma_d,sigma_r):
-    arr=[]
-    sum_num=0
-    sum_den=0
-    
+def bilateral_filter(i,j,d,I,sigma_d,sigma_r):
+    arr,sum_num,sum_den=[],0,0
+
     # Asigning the distance value for each neighbourhood pixel
-    def distance(height, width):
-      return np.absolute(height-width) # returns the absolute position of each pixel
+    def distance(i, j):
+      return np.absolute(i-j) # returns the absolute position of each pixel
     
     ''' assigining the kernel size for instance considering the kernel size to be 5X5 pixels. '''
-    for k in range(height-floor(d/2),height+ceil(d/2)):
-        for l in range(width-floor(d/2),width+ceil(d/2)):
-            term = (((height-k)**2)+(width-l)**2)/(sigma_d**2*2) + (distance(I[height,width],I[k,l]))/(sigma_r**2*2)
+    for k in range(i-floor(d/2),i+ceil(d/2)):
+        for l in range(j-floor(d/2),j+ceil(d/2)):
+            term = (((i-k)**2)+(j-l)**2)/(sigma_d**2*2) + (distance(I[i,j],I[k,l]))/(sigma_r**2*2)
             w = exp(-term) # Assigning the weights
             arr.append(w)
-            sum_num += I[k,l]*w
+            sum_num += (I[k,l]*w)
             sum_den += w      
     return sum_num/sum_den
 
-def show_bilateral_image(image,sigma_d,sigma_r):
-  height,width = image.shape
-  for i in range(1,height):
-    for j in range(1,width):
-      # Considering the sigma_d,sigma_r as same value and radius as default value 10.
-      I_new[i-1,j-1] = bilateral_filter(i-1,j-1,10,I,sigma_d,sigma_r)
-  return I_new
+plt.imsave('/Users/aneruthmohanasundaram/Documents/GitHub/Project_Alina/Data/alina_output.png',bilateral_iamge,cmap='gray')
 
-bilateral_image = show_bilateral_image(noisy_img,77,77)
-
-print(f'Type of the given bilateral image is {type(bilateral_image)}')
-print(f'Size of given bilateral image is {bilateral_image.shape}')
-print(f'Height of given bilateral image is {bilateral_image.shape[0]}')
-print(f'Width of given bilateral image is {bilateral_image.shape[1]}')
-print(f'Diemension of the given bilateral image is {bilateral_image.ndim}')
-print(f'PSNR value for bilateral image is: {psnr(noisy_img,bilateral_image)} dB')
+print(f'Type of the given bilateral image is {type(bilateral_iamge)}')
+print(f'Size of given bilateral image is {bilateral_iamge.shape}')
+print(f'Height of given bilateral image is {bilateral_iamge.shape[0]}')
+print(f'Width of given bilateral image is {bilateral_iamge.shape[1]}')
+print(f'Diemension of the given bilateral image is {bilateral_iamge.ndim}')
+print(f'PSNR value for bilateral image is: {psnr(noisy_img,bilateral_iamge)} dB')
 
 fig,axes = plt.subplots(nrows=1,ncols=3,figsize=(15,8))
 
@@ -135,5 +123,5 @@ axes[1].imshow(noisy_img,cmap='gray')
 axes[2].set_xlabel('Width')
 axes[2].set_ylabel('Height')
 axes[2].set_title('Bilateral Image')
-axes[2].imshow(bilateral_image,cmap='gray')
+axes[2].imshow(bilateral_iamge,cmap='gray')
 plt.show()
