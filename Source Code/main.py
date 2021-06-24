@@ -1,5 +1,5 @@
 # Importing the packages
-from math import log10, sqrt
+from math import *
 import numpy as np,cv2
 from skimage import io
 from matplotlib import pyplot as plt
@@ -12,7 +12,7 @@ from imageio import imread
 ################################################### ###### ###################################################
 
 # Loading the image
-img = imread('/Users/aneruthmohanasundaram/Documents/GitHub/Project_Alina/Data/Test3.jpg')
+img = imread('image path')
 
 # A function to add random noise to our image
 def add_noise_to_image(image):
@@ -76,36 +76,64 @@ each pixel's intensity with a weighted average of intensity values from surround
 distribution can be used to calculate this weight. '''
 ################################################### ###### ###################################################
 
-# To perform bilateral filtering at first we need to create a spacial gaussian kernel 
-# Funtion to perform/calculate gaussian kernel
-# def gaussKernel(img,windowSize,sigmaValue):
-#   ''' Uses the open CV package to calculate the gaussian Blur which 
-#   takes in the image, window size and sigma Value.'''
-#   kernel = cv2.GaussianBlur(img,windowSize,sigmaValue)
-#   return kernel
+I = noisy_img
+data = I
+I = np.lib.pad(I, 1, 'mean')
+I_new = np.copy(data)
 
-# spacialKernel = gaussKernel(img,(5,5),1)
+def bilateral_filter(height,width,d,I,sigma_d,sigma_r):
+    arr=[]
+    sum_num=0
+    sum_den=0
+    
+    # Asigning the distance value for each neighbourhood pixel
+    def distance(height, width):
+      return np.absolute(height-width) # returns the absolute position of each pixel
+    
+    ''' assigining the kernel size for instance considering the kernel size to be 5X5 pixels. '''
+    for k in range(height-floor(d/2),height+ceil(d/2)):
+        for l in range(width-floor(d/2),width+ceil(d/2)):
+            term = (((height-k)**2)+(width-l)**2)/(sigma_d**2*2) + (distance(I[height,width],I[k,l]))/(sigma_r**2*2)
+            w = exp(-term) # Assigning the weights
+            arr.append(w)
+            sum_num += I[k,l]*w
+            sum_den += w      
+    return sum_num/sum_den
 
-# height,width,channels = img.shape
+def show_bilateral_image(image,sigma_d,sigma_r):
+  height,width = image.shape
+  for i in range(1,height):
+    for j in range(1,width):
+      # Considering the sigma_d,sigma_r as same value and radius as default value 10.
+      I_new[i-1,j-1] = bilateral_filter(i-1,j-1,10,I,sigma_d,sigma_r)
+  return I_new
 
-# # A function to create bilateral filter
-# def bilateralFilter(image,sigma):
-#   output_image = np.zeros([height,width,channels]) # an empty numpy array to store the image
-#   # Iterating over each pixel
-#   for i in range(height):
-#     for j in range(width):
-#       ip,w = 0,0
-#       # Sliding thorough the window size
-#       for x in range(-5,5):
-#         for y in range(-5,5):
-#           q_y = np.max([0, np.min([height - 1, i + x])])
-#           q_x = np.max([0, np.min([width - 1, j + y])])
-#           # Computer Gaussian filter weight at this filter pixel
-#           g = np.exp( -((q_x - j)**2 + (q_y - i)**2) / (2 * sigma**2) )
-#           # Accumulate filtered output
-#           ip += g * image[i, j, :]
-#           # Accumulate filter weight for later normalization, to maintain image brightness
-#           w += g
-#     output_image[i, j, :] = ip / (w + np.finfo(np.float32).eps)
-#   return output_image
+bilateral_image = show_bilateral_image(noisy_img,77,77)
 
+print(f'Type of the given bilateral image is {type(bilateral_image)}')
+print(f'Size of given bilateral image is {bilateral_image.shape}')
+print(f'Height of given bilateral image is {bilateral_image.shape[0]}')
+print(f'Width of given bilateral image is {bilateral_image.shape[1]}')
+print(f'Diemension of the given bilateral image is {bilateral_image.ndim}')
+print(f'PSNR value for bilateral image is: {psnr(noisy_img,bilateral_image)} dB')
+
+fig,axes = plt.subplots(nrows=1,ncols=3,figsize=(15,8))
+
+# to plot the image
+axes[0].set_xlabel('Width')
+axes[0].set_ylabel('Height')
+axes[0].set_title('Orginal Image')
+axes[0].imshow(grayImg,cmap='gray')
+
+# to plot the noisy image
+axes[1].set_xlabel("Width")
+axes[1].set_ylabel("Height")
+axes[1].set_title("Noisy Image")
+axes[1].imshow(noisy_img,cmap='gray') 
+
+# to plot the Bilateral image
+axes[2].set_xlabel('Width')
+axes[2].set_ylabel('Height')
+axes[2].set_title('Bilateral Image')
+axes[2].imshow(bilateral_image,cmap='gray')
+plt.show()
